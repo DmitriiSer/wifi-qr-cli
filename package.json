@@ -1,0 +1,35 @@
+{
+  "name": "wifi-qr-cli",
+  "version": "2.0.0",
+  "description": "Wi-Fi QR Code Generator - Create QR codes for Wi-Fi networks with custom styling (square/circle modules)",
+  "main": "wifi-qr.js",
+  "bin": {
+    "wifi-qr": "./wifi-qr.js"
+  },
+  "scripts": {
+    "start": "node wifi-qr.js",
+    "test": "node test-qr-styles.js",
+    "help": "node wifi-qr.js --help"
+  },
+  "keywords": [
+    "wifi",
+    "qr-code",
+    "qr",
+    "cli",
+    "wireless",
+    "network",
+    "generator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "@loskir/styled-qr-code-node": "^1.5.2",
+    "chalk": "^4.1.2",
+    "commander": "^14.0.0",
+    "inquirer": "^8.2.6",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
