@@ -41,6 +41,9 @@ logs
 *.gif
 *.svg
 
+# Exception: Include example QR codes for README
+!examples/*.png
+
 # IDE/Editor files
 .vscode/
 .idea/

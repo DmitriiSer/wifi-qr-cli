@@ -121,6 +121,34 @@ chmod +x wifi-qr.js
 - **Validation**: Supports both 3-digit and 6-digit hex codes
 - **Interactive Mode**: Select "custom" to enter your own hex code
 
+## 🎨 Visual Style Examples
+
+Compare all 5 QR code styles side by side. All examples use: **`Demo-WiFi`** / **`demo123`**
+
+|                                Square                                |                                Rounded                                |                               Dots                               |                                Classy                                 |                                    Extra-Rounded                                    |
+| :------------------------------------------------------------------: | :-------------------------------------------------------------------: | :--------------------------------------------------------------: | :-------------------------------------------------------------------: | :---------------------------------------------------------------------------------: |
+| <img src="examples/square-black.png" alt="Square Style" width="150"> | <img src="examples/rounded-blue.png" alt="Rounded Style" width="150"> | <img src="examples/dots-green.png" alt="Dots Style" width="150"> | <img src="examples/classy-purple.png" alt="Classy Style" width="150"> | <img src="examples/extra-rounded-orange.png" alt="Extra-Rounded Style" width="150"> |
+|                **Classic Squares**<br>Black (#000000)                |                 **Smooth Corners**<br>Blue (#0066CC)                  |               **Circular Dots**<br>Green (#00AA00)               |                **Elegant Tapered**<br>Purple (#6600CC)                |                        **Soft Bubbles**<br>Orange (#FF6600)                         |
+|                 `--style square`<br>`--color black`                  |                  `--style rounded`<br>`--color blue`                  |                `--style dots`<br>`--color green`                 |                 `--style classy`<br>`--color purple`                  |                     `--style extra-rounded`<br>`--color orange`                     |
+
+### Style Characteristics
+
+| Style             | Description                     | Best For                       | Compatibility      |
+| ----------------- | ------------------------------- | ------------------------------ | ------------------ |
+| **Square**        | Traditional sharp-edged modules | Corporate, legacy devices      | ⭐⭐⭐⭐⭐ Maximum |
+| **Rounded**       | Smooth rounded corners          | Modern aesthetic + reliability | ⭐⭐⭐⭐⭐ High    |
+| **Dots**          | Perfect circular data modules   | Minimalist, social media       | ⭐⭐⭐⭐ Good      |
+| **Classy**        | Elegant tapered shapes          | Professional, luxury brands    | ⭐⭐⭐⭐ Good      |
+| **Extra-Rounded** | Very soft bubble-like modules   | Playful, children's apps       | ⭐⭐⭐ Moderate    |
+
+### Generate Your Own
+
+```bash
+# Try different combinations
+./wifi-qr.js -s "Your-WiFi" -p "your-password" --style rounded --color blue -o my-qr
+./wifi-qr.js -s "Your-WiFi" -p "your-password" --style dots --color "#FF5733" -o custom-qr
+```
+
 ## 🔒 Security Types
 
 | Type   | Description   | Use Case                           |

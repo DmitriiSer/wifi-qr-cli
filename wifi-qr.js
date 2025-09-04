@@ -16,10 +16,13 @@ const SecurityTypes = [
     'Open (No Password)'
 ];
 
-// QR Styles (same as Go version)
+// QR Styles with verified working options
 const QRStyles = [
-    { name: 'square', description: 'Classic squares (maximum compatibility)' },
-    { name: 'circle', description: 'Square corners + circular data (aesthetic & reliable)' }
+    { name: 'square', dotType: 'square', cornerType: 'square', description: 'Classic squares (maximum compatibility)' },
+    { name: 'rounded', dotType: 'rounded', cornerType: 'square', description: 'Smooth rounded corners (aesthetic & reliable)' },
+    { name: 'dots', dotType: 'dots', cornerType: 'square', description: 'Pure circular dots (modern minimal)' },
+    { name: 'classy', dotType: 'classy', cornerType: 'square', description: 'Elegant tapered modules (professional)' },
+    { name: 'extra-rounded', dotType: 'extra-rounded', cornerType: 'square', description: 'Very soft bubbles (playful & friendly)' }
 ];
 
 // QR Code colors available
@@ -59,7 +62,7 @@ class WiFiQRGenerator {
             .option('-p, --password <string>', 'Wi-Fi password')
             .option('-t, --security <string>', 'Security type: wpa, wep, open (default: wpa)')
             .option('-H, --hidden', 'Hidden network', false)
-            .option('-S, --style <string>', 'QR style: square, circle (default: square)')
+            .option('-S, --style <string>', 'QR style: square, rounded, dots, classy, extra-rounded (default: square)')
             .option('-c, --color <string>', 'QR color: black, blue, green, red, purple, orange, or hex code (default: black)')
             .option('-o, --output <string>', 'Output filename (without extension) - saves to file instead of terminal')
             .configureHelp({
@@ -85,12 +88,17 @@ Examples:
   # Save to file - long flags
   wifi-qr --ssid MyWiFi --password mypass123 --output my-wifi
 
-  # Generate circle style - mixed flags
-  wifi-qr -s MyWiFi -p mypass123 --style circle -o my-wifi
+  # Generate rounded style - mixed flags
+  wifi-qr -s MyWiFi -p mypass123 --style rounded -o my-wifi
+
+  # Custom styles
+  wifi-qr -s MyWiFi -p mypass123 --style dots -o modern-dots
+  wifi-qr -s MyWiFi -p mypass123 --style classy -o elegant-classy
+  wifi-qr -s MyWiFi -p mypass123 --style extra-rounded -o playful-bubbles
 
   # Custom colors
   wifi-qr -s MyWiFi -p mypass123 --color blue -o my-wifi-blue
-  wifi-qr -s MyWiFi -p mypass123 -c "#FF5733" --style circle -o custom-color
+  wifi-qr -s MyWiFi -p mypass123 -c "#FF5733" --style rounded -o custom-color
 
 Security Types:
   wpa    - WPA/WPA2/WPA3 (most common)
@@ -99,7 +107,10 @@ Security Types:
 
 QR Styles:
   square       - Classic squares (maximum compatibility)
-  circle       - Square corners + circular data (aesthetic & reliable)
+  rounded      - Smooth rounded corners (aesthetic & reliable)
+  dots         - Pure circular dots (modern minimal)
+  classy       - Elegant tapered modules (professional)
+  extra-rounded - Very soft bubbles (playful & friendly)
 
 Notes:
   - Default behavior: displays QR code in terminal
@@ -430,8 +441,15 @@ Notes:
             console.log(chalk.yellow('⚠️  Note: WEP is deprecated and may not work on modern iOS versions\n'));
         }
 
-        if (config.style === 'circle') {
-            console.log(chalk.magenta('✨ Circle style: Square corners for reliability + circular data for aesthetics!\n'));
+        const styleMessages = {
+            'rounded': '✨ Rounded style: Smooth rounded corners with reliable square finder patterns!',
+            'dots': '🔵 Dots style: Modern circular dots for a clean, minimal look!',
+            'classy': '🎩 Classy style: Elegant tapered modules for professional aesthetics!',
+            'extra-rounded': '🫧 Extra-rounded style: Very soft bubbles for playful, friendly designs!'
+        };
+
+        if (styleMessages[config.style]) {
+            console.log(chalk.magenta(`${styleMessages[config.style]}\n`));
         }
     }
 
@@ -460,41 +478,28 @@ Notes:
             }
         };
 
-        if (config.style === 'circle') {
-            // Circle style: square corners + circular data
-            qrOptions.dotsOptions = {
-                type: 'rounded',
-                color: colorHex
-            };
-            qrOptions.cornersSquareOptions = {
-                type: 'square',
-                color: colorHex
-            };
-            qrOptions.cornersDotOptions = {
-                type: 'square',
-                color: colorHex
-            };
-        } else {
-            // Square style: traditional squares
-            qrOptions.dotsOptions = {
-                type: 'square',
-                color: colorHex
-            };
-            qrOptions.cornersSquareOptions = {
-                type: 'square',
-                color: colorHex
-            };
-            qrOptions.cornersDotOptions = {
-                type: 'square',
-                color: colorHex
-            };
-        }
+        // Get style configuration
+        const styleConfig = QRStyles.find(s => s.name === config.style) || QRStyles[0];
+        
+        qrOptions.dotsOptions = {
+            type: styleConfig.dotType,
+            color: colorHex
+        };
+        qrOptions.cornersSquareOptions = {
+            type: styleConfig.cornerType,
+            color: colorHex
+        };
+        qrOptions.cornersDotOptions = {
+            type: styleConfig.cornerType,
+            color: colorHex
+        };
 
         const qr = new QRCodeCanvas(qrOptions);
         await qr.toFile(absolutePath, 'png');
         
         const colorDisplay = config.color === colorHex ? config.color : `${config.color} (${colorHex})`;
-        console.log(chalk.green(`${config.style === 'circle' ? 'Circle' : 'Square'} QR code (${colorDisplay}) saved as: ${absolutePath}`));
+        const styleName = config.style.charAt(0).toUpperCase() + config.style.slice(1);
+        console.log(chalk.green(`${styleName} QR code (${colorDisplay}) saved as: ${absolutePath}`));
     }
 
     parse(argv) {
