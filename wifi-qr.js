@@ -22,6 +22,17 @@ const QRStyles = [
     { name: 'circle', description: 'Square corners + circular data (aesthetic & reliable)' }
 ];
 
+// QR Code colors available
+const QRColors = [
+    { name: 'black', hex: '#000000', description: 'Black (default, maximum compatibility)' },
+    { name: 'blue', hex: '#0066CC', description: 'Blue (professional)' },
+    { name: 'green', hex: '#00AA00', description: 'Green (nature)' },
+    { name: 'red', hex: '#CC0000', description: 'Red (attention)' },
+    { name: 'purple', hex: '#6600CC', description: 'Purple (creative)' },
+    { name: 'orange', hex: '#FF6600', description: 'Orange (energetic)' },
+    { name: 'custom', hex: '', description: 'Custom hex color (e.g., #FF5733)' }
+];
+
 class WiFiConfig {
     constructor() {
         this.ssid = '';
@@ -29,6 +40,7 @@ class WiFiConfig {
         this.security = '';
         this.hidden = false;
         this.style = 'square';
+        this.color = 'black';
     }
 }
 
@@ -48,6 +60,7 @@ class WiFiQRGenerator {
             .option('-t, --security <string>', 'Security type: wpa, wep, open (default: wpa)')
             .option('-H, --hidden', 'Hidden network', false)
             .option('-S, --style <string>', 'QR style: square, circle (default: square)')
+            .option('-c, --color <string>', 'QR color: black, blue, green, red, purple, orange, or hex code (default: black)')
             .option('-o, --output <string>', 'Output filename (without extension) - saves to file instead of terminal')
             .configureHelp({
                 helpWidth: 100,
@@ -74,6 +87,10 @@ Examples:
 
   # Generate circle style - mixed flags
   wifi-qr -s MyWiFi -p mypass123 --style circle -o my-wifi
+
+  # Custom colors
+  wifi-qr -s MyWiFi -p mypass123 --color blue -o my-wifi-blue
+  wifi-qr -s MyWiFi -p mypass123 -c "#FF5733" --style circle -o custom-color
 
 Security Types:
   wpa    - WPA/WPA2/WPA3 (most common)
@@ -109,7 +126,7 @@ Notes:
             
             // Generate QR code
             if (options.output) {
-                await this.generateQRFile(qrContent, options.output, config.style);
+                await this.generateQRFile(qrContent, options.output, config);
             } else {
                 this.displayQRTerminal(qrContent);
                 
@@ -137,7 +154,7 @@ Notes:
                             }
                         }]);
                         
-                        await this.generateQRFile(qrContent, filenameAnswer.filename, config.style);
+                        await this.generateQRFile(qrContent, filenameAnswer.filename, config);
                     }
                 }
             }
@@ -251,12 +268,59 @@ Notes:
             config.style = answer.style.split(' - ')[0];
         }
 
+        // Color
+        if (options.color) {
+            if (this.isValidColor(options.color)) {
+                config.color = options.color;
+                console.log(chalk.green(`🎨 Using color from flag: ${config.color}`));
+            } else {
+                config.color = 'black';
+                console.log(chalk.yellow('🎨 Invalid color, using default: black'));
+            }
+        } else if (hasAnyFlags) {
+            config.color = 'black';
+            console.log(chalk.yellow('🎨 Using default color: black (no -c/--color flag provided)'));
+        } else {
+            const colorChoices = QRColors.map(color => 
+                `${color.name} - ${color.description}`
+            );
+            const answer = await inquirer.prompt([{
+                type: 'list',
+                name: 'color',
+                message: 'Choose QR code color:',
+                choices: colorChoices,
+                default: colorChoices[0]
+            }]);
+            
+            const selectedColorName = answer.color.split(' - ')[0]; // Extract color name from choice
+            
+            if (selectedColorName === 'custom') {
+                const customAnswer = await inquirer.prompt([{
+                    type: 'input',
+                    name: 'hexColor',
+                    message: 'Enter hex color code (e.g., #FF5733):',
+                    validate: (input) => {
+                        if (!input.trim()) {
+                            return 'Color cannot be empty';
+                        }
+                        if (!this.isValidHexColor(input.trim())) {
+                            return 'Invalid hex color format. Use format like #FF5733 or #f57';
+                        }
+                        return true;
+                    }
+                }]);
+                config.color = customAnswer.hexColor.trim();
+            } else {
+                config.color = selectedColorName;
+            }
+        }
+
         return config;
     }
 
     hasAnyFlags(options) {
         return !!(options.ssid || options.password || options.security || 
-                 options.hidden || options.style || options.output);
+                 options.hidden || options.style || options.color || options.output);
     }
 
     mapSecurityType(security) {
@@ -286,6 +350,32 @@ Notes:
 
     isValidStyle(style) {
         return QRStyles.some(s => s.name === style);
+    }
+
+    isValidColor(color) {
+        // Check if it's a predefined color name
+        if (QRColors.some(c => c.name === color)) {
+            return true;
+        }
+        // Check if it's a valid hex color
+        return this.isValidHexColor(color);
+    }
+
+    isValidHexColor(hex) {
+        // Valid hex color patterns: #RGB, #RRGGBB
+        const hexPattern = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
+        return hexPattern.test(hex);
+    }
+
+    getColorHex(colorName) {
+        // If it's already a hex color, return it
+        if (this.isValidHexColor(colorName)) {
+            return colorName;
+        }
+        
+        // Find the color in predefined colors
+        const color = QRColors.find(c => c.name === colorName);
+        return color ? color.hex : '#000000'; // Default to black if not found
     }
 
     generateWiFiQRContent(config) {
@@ -325,6 +415,7 @@ Notes:
         console.log(`   Security: ${config.security || 'Auto'} → ${config.security || 'WPA'} (iOS compatible)`);
         console.log(`   Hidden: ${config.hidden} (hidden field omitted for iOS compatibility)`);
         console.log(`   Style: ${config.style} (${this.getStyleDescription(config.style)})`);
+        console.log(`   Color: ${config.color} (${this.getColorHex(config.color)})`);
         console.log(`   QR Content: ${qrContent}`);
         console.log(`   Field Order: ✅ S,T,P (iOS required format)\n`);
     }
@@ -352,12 +443,13 @@ Notes:
         });
     }
 
-    async generateQRFile(content, filename, style) {
+    async generateQRFile(content, filename, config) {
         if (!filename.endsWith('.png')) {
             filename += '.png';
         }
 
         const absolutePath = path.resolve(filename);
+        const colorHex = this.getColorHex(config.color);
 
         const qrOptions = {
             data: content,
@@ -368,40 +460,41 @@ Notes:
             }
         };
 
-        if (style === 'circle') {
+        if (config.style === 'circle') {
             // Circle style: square corners + circular data
             qrOptions.dotsOptions = {
                 type: 'rounded',
-                color: '#000000'
+                color: colorHex
             };
             qrOptions.cornersSquareOptions = {
                 type: 'square',
-                color: '#000000'
+                color: colorHex
             };
             qrOptions.cornersDotOptions = {
                 type: 'square',
-                color: '#000000'
+                color: colorHex
             };
         } else {
             // Square style: traditional squares
             qrOptions.dotsOptions = {
                 type: 'square',
-                color: '#000000'
+                color: colorHex
             };
             qrOptions.cornersSquareOptions = {
                 type: 'square',
-                color: '#000000'
+                color: colorHex
             };
             qrOptions.cornersDotOptions = {
                 type: 'square',
-                color: '#000000'
+                color: colorHex
             };
         }
 
         const qr = new QRCodeCanvas(qrOptions);
         await qr.toFile(absolutePath, 'png');
         
-        console.log(chalk.green(`${style === 'circle' ? 'Circle' : 'Square'} QR code saved as: ${absolutePath}`));
+        const colorDisplay = config.color === colorHex ? config.color : `${config.color} (${colorHex})`;
+        console.log(chalk.green(`${config.style === 'circle' ? 'Circle' : 'Square'} QR code (${colorDisplay}) saved as: ${absolutePath}`));
     }
 
     parse(argv) {

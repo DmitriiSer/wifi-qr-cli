@@ -7,6 +7,7 @@ A professional Node.js CLI tool for generating Wi-Fi QR codes with custom stylin
 - 🎯 **Interactive Mode**: Guided prompts for easy use
 - ⚡ **Command-line Flags**: POSIX-style short and long options
 - 🎨 **Custom Styling**: Square and circular module styles
+- 🌈 **Color Customization**: 6 predefined colors + custom hex colors
 - 📱 **iOS Compatible**: Optimized QR format for iPhone scanning
 - 🖥️ **Terminal Display**: Built-in terminal QR code viewer
 - 💾 **File Output**: High-quality PNG generation
@@ -82,6 +83,7 @@ chmod +x wifi-qr.js
 | `-t`  | `--security` | Security type: `wpa`, `wep`, `open` | `wpa`                           |
 | `-H`  | `--hidden`   | Hidden network flag                 | `false`                         |
 | `-S`  | `--style`    | QR style: `square`, `circle`        | `square`                        |
+| `-c`  | `--color`    | QR color: predefined or hex code    | `black`                         |
 | `-o`  | `--output`   | Output filename (without extension) | _terminal display_              |
 | `-h`  | `--help`     | Show help message                   |                                 |
 | `-V`  | `--version`  | Show version number                 |                                 |
@@ -99,6 +101,25 @@ chmod +x wifi-qr.js
 - **Description**: Square corner patterns + circular data modules
 - **Compatibility**: High compatibility (corners preserved for scanning)
 - **Use Case**: Aesthetic designs while maintaining reliability
+
+## 🌈 QR Code Colors
+
+### Predefined Colors
+
+| Color  | Hex Code | Description             | Use Case                   |
+| ------ | -------- | ----------------------- | -------------------------- |
+| black  | #000000  | Classic black (default) | Maximum compatibility      |
+| blue   | #0066CC  | Professional blue       | Corporate branding         |
+| green  | #00AA00  | Nature green            | Environmental themes       |
+| red    | #CC0000  | Attention red           | Important/urgent networks  |
+| purple | #6600CC  | Creative purple         | Artistic/creative projects |
+| orange | #FF6600  | Energetic orange        | Dynamic/energetic themes   |
+
+### Custom Colors
+
+- **Hex Format**: Use any hex color code (e.g., `#FF5733`, `#f57`)
+- **Validation**: Supports both 3-digit and 6-digit hex codes
+- **Interactive Mode**: Select "custom" to enter your own hex code
 
 ## 🔒 Security Types
 
@@ -148,16 +169,42 @@ chmod +x wifi-qr.js
 
 # WEP network (legacy)
 ./wifi-qr.js -s "Old-Router" -p "12345" --security wep -o legacy-wifi
+
+# Blue circle QR code
+./wifi-qr.js -s "Corporate-WiFi" -p "password123" --style circle --color blue -o corporate-wifi
+
+# Custom hex color with style
+./wifi-qr.js -s "Creative-Space" -p "artpass" --color "#FF5733" --style circle -o creative-wifi
+```
+
+### Color Examples
+
+```bash
+# Predefined colors
+./wifi-qr.js -s "MyWiFi" -p "pass123" --color blue -o blue-qr
+./wifi-qr.js -s "MyWiFi" -p "pass123" --color green --style circle -o green-circle
+./wifi-qr.js -s "MyWiFi" -p "pass123" -c red -o red-qr
+
+# Custom hex colors
+./wifi-qr.js -s "MyWiFi" -p "pass123" --color "#FF5733" -o orange-red
+./wifi-qr.js -s "MyWiFi" -p "pass123" -c "#f57" --style circle -o short-hex
+./wifi-qr.js -s "MyWiFi" -p "pass123" --color "#00FFFF" -o cyan-qr
+
+# Colors with other options
+./wifi-qr.js -s "HiddenNet" -p "secret" --hidden --color purple --style circle -o purple-hidden
 ```
 
 ### Mixed Flag Styles
 
 ```bash
 # Short and long flags combined
-./wifi-qr.js -s "MyWiFi" --password "mypass123" --style circle -o styled-wifi
+./wifi-qr.js -s "MyWiFi" --password "mypass123" --style circle --color blue -o styled-wifi
 
 # All long flags
-./wifi-qr.js --ssid "MyWiFi" --password "mypass123" --security wpa --style circle --output styled-wifi
+./wifi-qr.js --ssid "MyWiFi" --password "mypass123" --security wpa --style circle --color green --output styled-wifi
+
+# Mix of short and long with custom color
+./wifi-qr.js -s "MyWiFi" --password "mypass123" -c "#FF5733" --style circle -o custom-styled
 ```
 
 ## 🔧 Development
