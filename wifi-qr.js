@@ -352,11 +352,11 @@ Notes:
     }
 
     mapSecurityFromChoice(choice) {
-        if (choice.includes('WPA2/WPA3')) return '';
+        if (choice.includes('WPA2/WPA3')) return 'WPA';
         if (choice.includes('WPA (Legacy)')) return 'WPA';
         if (choice.includes('WEP')) return 'WEP';
         if (choice.includes('Open')) return 'nopass';
-        return '';
+        return 'WPA';
     }
 
     isValidStyle(style) {
@@ -409,15 +409,12 @@ Notes:
 
     escapeQRString(str) {
         if (!str) return '';
-        
+
         return str
             .replace(/\\/g, '\\\\')  // Escape backslashes first
             .replace(/;/g, '\\;')    // Escape semicolons
             .replace(/,/g, '\\,')    // Escape commas
-            .replace(/"/g, '\\"')    // Escape quotes
-            .replace(/'/g, "\\'")    // Escape single quotes
-            .replace(/</g, '\\<')    // Escape less than
-            .replace(/>/g, '\\>');   // Escape greater than
+            .replace(/:/g, '\\:');   // Escape colons
     }
 
     displayDebugInfo(config, qrContent) {
