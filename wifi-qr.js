@@ -390,20 +390,27 @@ Notes:
     }
 
     generateWiFiQRContent(config) {
-        // iOS-specific Wi-Fi QR code format: WIFI:S:<SSID>;T:<WPA|WEP|nopass>;P:<password>;;
-        // CRITICAL: Field order matters for iOS! S must come before T
-        
+        // Standard Wi-Fi QR code format: WIFI:S:<SSID>;T:<WPA|WEP|nopass>;P:<password>;H:<true>;;
+        // Field order: S, T, P, then H (matches the ZXing spec used by iOS & Android).
+
         const escapedSSID = this.escapeQRString(config.ssid);
         const escapedPassword = this.escapeQRString(config.password);
-        
+
         let content = `WIFI:S:${escapedSSID};T:${config.security};`;
-        
+
         if (config.security !== 'nopass') {
             content += `P:${escapedPassword};`;
         }
-        
+
+        // A hidden network does not broadcast its SSID, so the H:true flag is
+        // required for the device (Android in particular) to actively probe for
+        // it. Omit it entirely for non-hidden networks.
+        if (config.hidden) {
+            content += 'H:true;';
+        }
+
         content += ';';
-        
+
         return content;
     }
 
@@ -421,7 +428,7 @@ Notes:
         console.log(chalk.cyan('📋 Debug Information:'));
         console.log(`   SSID: ${config.ssid}`);
         console.log(`   Security: ${config.security || 'Auto'} → ${config.security || 'WPA'} (iOS compatible)`);
-        console.log(`   Hidden: ${config.hidden} (hidden field omitted for iOS compatibility)`);
+        console.log(`   Hidden: ${config.hidden}${config.hidden ? ' (H:true included so devices probe for the network)' : ''}`);
         console.log(`   Style: ${config.style} (${this.getStyleDescription(config.style)})`);
         console.log(`   Color: ${config.color} (${this.getColorHex(config.color)})`);
         console.log(`   QR Content: ${qrContent}`);
